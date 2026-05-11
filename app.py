@@ -1,10 +1,12 @@
 from pathlib import Path
+import base64
 import streamlit as st
 
 ROOT         = Path(__file__).parent
 AWARD_DIR    = ROOT / "assets" / "awards"
 RESEARCH_DIR = ROOT / "assets" / "research"
 PROJECT_DIR  = ROOT / "assets" / "project"
+SCORES_DIR   = ROOT / "assets" / "scores"
 
 # ══════════════════════════════════════════════════════════════
 #  数据
@@ -317,6 +319,28 @@ def sec(title: str, desc: str = "") -> None:
     )
 
 
+def show_pdf(path: Path, height: int = 680) -> None:
+    """在页面内嵌显示 PDF，同时提供下载按钮。"""
+    if not path.exists():
+        st.caption(f"⚠ 文件待上传：`{path.name}`")
+        return
+    raw = path.read_bytes()
+    b64 = base64.b64encode(raw).decode()
+    st.markdown(
+        f'<iframe src="data:application/pdf;base64,{b64}" '
+        f'width="100%" height="{height}px" '
+        f'style="border:1px solid #d9e4ea;border-radius:8px;"></iframe>',
+        unsafe_allow_html=True,
+    )
+    st.download_button(
+        label=f"⬇ 下载 {path.name}",
+        data=raw,
+        file_name=path.name,
+        mime="application/pdf",
+        use_container_width=False,
+    )
+
+
 # ══════════════════════════════════════════════════════════════
 #  Hero
 # ══════════════════════════════════════════════════════════════
@@ -550,6 +574,37 @@ def render_honors() -> None:
 
 
 # ══════════════════════════════════════════════════════════════
+#  Tab 4 · 成绩材料
+# ══════════════════════════════════════════════════════════════
+
+def render_scores() -> None:
+    sec("专业课成绩单 & 排名证明",
+        "前两年半完整成绩单 + 学习成绩排名证明，可在线预览或下载原件。")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("#### 前两年半成绩单")
+        show_pdf(SCORES_DIR / "transcript.pdf", height=700)
+    with col2:
+        st.markdown("#### 学习成绩排名证明")
+        show_pdf(SCORES_DIR / "ranking.pdf", height=700)
+
+    sec("英语四六级成绩",
+        "CET-4 / CET-6 官方成绩单及学校出具的四六级成绩证明。")
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("#### CET-4 官方成绩单")
+        show_pdf(SCORES_DIR / "CET4.pdf", height=580)
+    with col2:
+        st.markdown("#### CET-6 官方成绩单")
+        show_pdf(SCORES_DIR / "CET6.pdf", height=580)
+    with col3:
+        st.markdown("#### 学校四六级成绩证明")
+        show_pdf(SCORES_DIR / "english_cert.pdf", height=580)
+
+
+# ══════════════════════════════════════════════════════════════
 #  主函数
 # ══════════════════════════════════════════════════════════════
 
@@ -563,7 +618,7 @@ def main() -> None:
     inject_css()
     render_hero()
 
-    tab1, tab2, tab3 = st.tabs(["📄 申请信", "🔬 科研成果", "🏆 荣誉证明"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📄 申请信", "🔬 科研成果", "🏆 荣誉证明", "📊 成绩材料"])
 
     with tab1:
         render_letter()
@@ -574,6 +629,9 @@ def main() -> None:
 
     with tab3:
         render_honors()
+
+    with tab4:
+        render_scores()
 
     st.markdown("---")
     st.markdown(
