@@ -465,12 +465,22 @@ def render_hero() -> None:
     )
     st.markdown(f'<div class="stat-row">{stat_html}</div>', unsafe_allow_html=True)
 
-    # 照片 base64
+    # 照片 + 二维码 base64
+    import base64 as _b64
     photo_path = ROOT / "assets" / "photo.jpg"
+    qr_path    = ROOT / "assets" / "qr.png"
     photo_html = ""
     if photo_path.exists():
-        import base64 as _b64
         photo_b64 = _b64.b64encode(photo_path.read_bytes()).decode()
+        qr_part = ""
+        if qr_path.exists():
+            qr_b64 = _b64.b64encode(qr_path.read_bytes()).decode()
+            qr_part = (
+                f'<img src="data:image/png;base64,{qr_b64}" '
+                f'style="width:96px;height:96px;margin-top:.7rem;border-radius:4px;'
+                f'border:1px solid #d9e4ea;">'
+                f'<div style="font-size:.7rem;color:#516070;margin-top:.2rem;">扫码查看科研程序</div>'
+            )
         photo_html = (
             f'<div style="flex-shrink:0;text-align:center;padding-top:.3rem;">'
             f'<img src="data:image/jpeg;base64,{photo_b64}" '
@@ -478,7 +488,7 @@ def render_hero() -> None:
             f'border:1px solid #d9e4ea;">'
             f'<div style="font-size:.78rem;color:#516070;margin-top:.55rem;line-height:1.7;">'
             f'📞&nbsp;18306376923<br>📧&nbsp;1534827320@qq.com'
-            f'</div></div>'
+            f'</div>{qr_part}</div>'
         )
 
     # 主卡片
@@ -550,6 +560,7 @@ def render_letter() -> None:
 <h3>八、结语</h3>
 <p>本科阶段承蒙<b>张会星老师</b>悉心指导，我逐渐养成了严谨踏实、能吃苦肯投入的科研态度。十分敬佩您在人工智能、神经网络算法与地球物理反演交叉方向的学术积累与工程实践视野，真心渴望能加入您的课题组，把自身专业基础、代码能力与已有研究思路充分发挥，踏实跟随您求学科研。</p>
 <p>随信附上个人简历、成绩单、竞赛获奖证书等相关材料，恳请老师在百忙之中抽空审阅。无论结果如何，都由衷感谢老师拨冗阅读，期待能有机会得到您的指点与接纳！</p>
+<p>从 2025 年开始，我就把成为您的学生当作了我奋斗的目标。您对我有任何感兴趣的地方，都可以随时联系我。</p>
 <p style="margin-top:1.5rem;">此致 敬礼！<br><b>申请人：潘高</b><br><span style="color:#516070;">2026 年 5 月 11 日</span></p>
 </div>
 """, unsafe_allow_html=True)
