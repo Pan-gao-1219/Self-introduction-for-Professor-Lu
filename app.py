@@ -648,52 +648,59 @@ def render_research() -> None:
 
 def render_honors() -> None:
     _BADGE = {
-        "国家级":     "ha-badge-nation",
-        "全国":       "ha-badge-nation",
-        "国际平台":   "ha-badge-intl",
-        "省级":       "ha-badge-prov",
-        "市级":       "ha-badge-prov",
-        "校级专业赛": "ha-badge-school",
-        "院级最高荣誉": "ha-badge-school",
+        "国家级":    "ha-badge-nation",
+        "全国":      "ha-badge-nation",
+        "国际平台":  "ha-badge-intl",
+        "省级":      "ha-badge-prov",
+        "省级平台":  "ha-badge-prov",
+        "市级":      "ha-badge-prov",
+        "校级":      "ha-badge-school",
+        "校级专业赛":"ha-badge-school",
+        "院级":      "ha-badge-school",
     }
 
-    sec("重点奖项详解", "含金量说明 + 原始证书，让奖项不只是名字。")
+    # ── 荣誉总览清单 ──
+    sec("荣誉总览", "本科阶段全部获奖与荣誉称号。")
 
-    for icon, title, year, level, desc, cert_files in HIGHLIGHT_AWARDS:
-        badge_cls = _BADGE.get(level, "ha-badge-school")
-        st.markdown(
-            f'<div class="highlight-card">'
-            f'<div class="highlight-card-header">'
-            f'<div class="ha-icon">{icon}</div>'
-            f'<div class="ha-title-block">'
-            f'<div class="ha-title">{title}</div>'
-            f'<div class="ha-meta">'
-            f'<span class="ha-year">{year}</span>'
-            f'<span class="ha-badge {badge_cls}">{level}</span>'
-            f'</div></div></div>'
-            f'<div class="ha-desc">{desc}</div>'
-            f'</div>',
+    CAT_ORDER = ["奖学金", "学科竞赛", "综合荣誉", "社会实践", "志愿服务"]
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for title, cat, level, _ in AWARDS:
+        groups[cat].append((title, level))
+
+    col_a, col_b = st.columns(2)
+    for i, cat in enumerate(CAT_ORDER):
+        items = groups.get(cat, [])
+        if not items:
+            continue
+        col = col_a if i % 2 == 0 else col_b
+        rows = "".join(
+            f'<div style="display:flex;align-items:center;gap:.45rem;'
+            f'padding:.35rem 0;border-bottom:1px solid #f0f4f7;">'
+            f'<span class="ha-badge {_BADGE.get(lvl,"ha-badge-school")}">{lvl}</span>'
+            f'<span style="font-size:.9rem;color:#1a2b38;">{t}</span>'
+            f'</div>'
+            for t, lvl in items
+        )
+        col.markdown(
+            f'<div style="background:#fff;border:1px solid #d9e4ea;border-radius:10px;'
+            f'padding:1rem 1.2rem;margin-bottom:1rem;">'
+            f'<div style="font-weight:800;font-size:.95rem;color:#0e7490;'
+            f'margin-bottom:.5rem;">{cat}</div>'
+            f'{rows}</div>',
             unsafe_allow_html=True,
         )
-        valid = [(AWARD_DIR / f) for f in cert_files if (AWARD_DIR / f).exists()]
-        missing = [f for f in cert_files if not (AWARD_DIR / f).exists()]
-        if valid:
-            cols = st.columns(min(len(valid), 3))
-            for col, p in zip(cols, valid):
-                with col:
-                    img(p)
-        for f in missing:
-            st.caption(f"⚠ 证书待上传：`{f}`")
 
-    sec("完整奖项证书图集", "可按类别与级别筛选，查看所有原始证书。")
+    # ── 证书图片 ──
+    sec("证书材料", "可按类别或级别筛选查看原始证书。")
     categories = ["全部"] + sorted({a[1] for a in AWARDS})
     levels     = ["全部"] + sorted({a[2] for a in AWARDS})
     c1, c2 = st.columns(2)
-    cat = c1.selectbox("类别", categories)
-    lvl = c2.selectbox("级别", levels)
+    cat_sel = c1.selectbox("类别", categories)
+    lvl_sel = c2.selectbox("级别", levels)
     filtered = [a for a in AWARDS
-                if (cat == "全部" or a[1] == cat)
-                and (lvl == "全部" or a[2] == lvl)]
+                if (cat_sel == "全部" or a[1] == cat_sel)
+                and (lvl_sel == "全部" or a[2] == lvl_sel)]
     st.caption(f"当前展示 {len(filtered)} 项")
 
     for i in range(0, len(filtered), 3):
