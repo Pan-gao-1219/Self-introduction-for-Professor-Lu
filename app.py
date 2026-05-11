@@ -472,15 +472,6 @@ def render_hero() -> None:
     photo_html = ""
     if photo_path.exists():
         photo_b64 = _b64.b64encode(photo_path.read_bytes()).decode()
-        qr_part = ""
-        if qr_path.exists():
-            qr_b64 = _b64.b64encode(qr_path.read_bytes()).decode()
-            qr_part = (
-                f'<img src="data:image/png;base64,{qr_b64}" '
-                f'style="width:96px;height:96px;margin-top:.7rem;border-radius:4px;'
-                f'border:1px solid #d9e4ea;">'
-                f'<div style="font-size:.7rem;color:#516070;margin-top:.2rem;">扫码查看科研程序</div>'
-            )
         photo_html = (
             f'<div style="flex-shrink:0;text-align:center;padding-top:.3rem;">'
             f'<img src="data:image/jpeg;base64,{photo_b64}" '
@@ -488,7 +479,7 @@ def render_hero() -> None:
             f'border:1px solid #d9e4ea;">'
             f'<div style="font-size:.78rem;color:#516070;margin-top:.55rem;line-height:1.7;">'
             f'📞&nbsp;18306376923<br>📧&nbsp;1534827320@qq.com'
-            f'</div>{qr_part}</div>'
+            f'</div></div>'
         )
 
     # 主卡片
@@ -632,11 +623,15 @@ def render_research() -> None:
 把原本分散在多个脚本中的处理步骤整合为可视化流程。
 </div>
 """, unsafe_allow_html=True)
-    cols = st.columns(2)
-    for col, (title, fname) in zip(cols, QT_FIGURES):
+    qr_path = ROOT / "assets" / "qr.png"
+    qt_cols = st.columns([1, 1, 0.45])
+    for col, (title, fname) in zip(qt_cols[:2], QT_FIGURES):
         with col:
             st.markdown(f"**{title}**")
             img(PROJECT_DIR / fname)
+    with qt_cols[2]:
+        st.markdown("**扫码运行程序**")
+        img(qr_path)
 
     sec("创新项目证明")
     proj_items = [
