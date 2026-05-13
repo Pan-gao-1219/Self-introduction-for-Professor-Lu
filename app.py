@@ -720,27 +720,28 @@ def render_honors() -> None:
 
     # ── 证书图片 ──
     sec("证书材料", "可按类别或级别筛选查看原始证书。")
-    categories = ["全部"] + sorted({a[1] for a in AWARDS})
-    levels     = ["全部"] + sorted({a[2] for a in AWARDS})
-    c1, c2 = st.columns(2)
-    cat_sel = c1.selectbox("类别", categories)
-    lvl_sel = c2.selectbox("级别", levels)
-    filtered = [a for a in AWARDS
-                if (cat_sel == "全部" or a[1] == cat_sel)
-                and (lvl_sel == "全部" or a[2] == lvl_sel)]
-    st.caption(f"当前展示 {len(filtered)} 项")
+    with st.expander(f"📂 展开查看证书原件（共 {len(AWARDS)} 项）", expanded=False):
+        categories = ["全部"] + sorted({a[1] for a in AWARDS})
+        levels     = ["全部"] + sorted({a[2] for a in AWARDS})
+        c1, c2 = st.columns(2)
+        cat_sel = c1.selectbox("类别", categories)
+        lvl_sel = c2.selectbox("级别", levels)
+        filtered = [a for a in AWARDS
+                    if (cat_sel == "全部" or a[1] == cat_sel)
+                    and (lvl_sel == "全部" or a[2] == lvl_sel)]
+        st.caption(f"当前展示 {len(filtered)} 项")
 
-    for i in range(0, len(filtered), 3):
-        cols = st.columns(3)
-        for col, (title, cat_, lvl_, fname) in zip(cols, filtered[i:i+3]):
-            with col:
-                st.markdown(
-                    f'<span class="pill">{cat_}</span>'
-                    f'<span class="pill">{lvl_}</span>',
-                    unsafe_allow_html=True,
-                )
-                st.markdown(f"**{title}**")
-                img(AWARD_DIR / fname)
+        for i in range(0, len(filtered), 3):
+            cols = st.columns(3)
+            for col, (title, cat_, lvl_, fname) in zip(cols, filtered[i:i+3]):
+                with col:
+                    st.markdown(
+                        f'<span class="pill">{cat_}</span>'
+                        f'<span class="pill">{lvl_}</span>',
+                        unsafe_allow_html=True,
+                    )
+                    st.markdown(f"**{title}**")
+                    img(AWARD_DIR / fname)
 
 
 # ══════════════════════════════════════════════════════════════
